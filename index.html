@@ -1,652 +1,641 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CribFix – Apartment Maintenance Ticket System</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <style>
-    /* ── TOKENS ── */
-    :root {
-      --cream:          #FAF8F3;
-      --charcoal:       #1E1E1E;
-      --terracotta:     #C4622D;
-      --muted:          #9A8F86;
-      --light-border:   #E5E0D8;
-      --white:          #ffffff;
-      --open-bg:        #FFF3EE;  --open-text:     #C4622D;
-      --progress-bg:    #FFF9E6;  --progress-text: #A07800;
-      --resolved-bg:    #EFF7F2;  --resolved-text: #2E7D50;
-      --nav-h:          60px;
-    }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CribFix — Apartment Maintenance Made Simple</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f4f8;color:#1e293b;min-height:100vh}
+a{text-decoration:none;color:inherit}
+ul{list-style:none}
+input,select,textarea,button{font-family:inherit;font-size:1rem}
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--cream);
-      color: var(--charcoal);
-      line-height: 1.7;
-      min-height: 100vh;
-    }
+/* VARIABLES */
+:root{
+  --navy:#0f2a4a;
+  --navy2:#1a3d6b;
+  --blue:#1e6fff;
+  --blue-lt:#e8f0fe;
+  --slate:#475569;
+  --white:#ffffff;
+  --surface:#f8fafc;
+  --border:#e2e8f0;
+  --r-sm:6px;
+  --r-md:10px;
+  --r-lg:16px;
+  --shadow:0 1px 4px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
+  --shadow-lg:0 8px 32px rgba(15,42,74,.14);
+}
 
-    /* ══ STICKY TOPBAR ══ */
-    .topbar {
-      position: sticky; top: 0; z-index: 100;
-      background: var(--charcoal);
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 5%;
-      height: var(--nav-h);
-      box-shadow: 0 2px 16px rgba(0,0,0,0.18);
-    }
-    .topbar-brand {
-      display: flex; align-items: center; gap: 10px;
-      cursor: pointer; text-decoration: none;
-    }
-    .topbar-logo {
-      width: 34px; height: 34px;
-      background: var(--terracotta); border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 17px; flex-shrink: 0;
-    }
-    .topbar-name {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.35rem; color: var(--cream); letter-spacing: -0.3px;
-    }
-    .nav-tabs { display: flex; gap: 2px; list-style: none; }
-    .nav-tabs li button {
-      background: none; border: none; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500;
-      color: rgba(250,248,243,0.52);
-      padding: 8px 18px; border-radius: 7px;
-      transition: background 0.18s, color 0.18s;
-    }
-    .nav-tabs li button:hover { background: rgba(255,255,255,0.09); color: var(--cream); }
-    .nav-tabs li button.active { background: var(--terracotta); color: var(--cream); }
-    @media (max-width: 480px) {
-      .nav-tabs li button { padding: 8px 11px; font-size: 0.81rem; }
-      .topbar-name { font-size: 1.1rem; }
-    }
+/* NAVBAR */
+.navbar{
+  position:sticky;top:0;z-index:100;
+  background:#0f2a4a;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;height:62px;
+  box-shadow:0 2px 12px rgba(0,0,0,.25);
+}
+.navbar-brand{
+  display:flex;align-items:center;gap:10px;
+  font-size:1.35rem;font-weight:700;color:#fff;letter-spacing:-.5px;
+}
+.brand-icon{
+  width:34px;height:34px;border-radius:8px;
+  background:#1e6fff;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.navbar-links{display:flex;gap:4px}
+.nav-link{
+  padding:7px 18px;border-radius:6px;
+  color:rgba(255,255,255,.75);font-size:.92rem;font-weight:500;cursor:pointer;
+  transition:background .2s,color .2s;
+}
+.nav-link:hover{background:rgba(255,255,255,.12);color:#fff}
+.nav-link.active{background:#1e6fff;color:#fff}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px}
+.hamburger span{display:block;width:22px;height:2px;background:#fff;margin:5px 0;border-radius:2px}
 
-    /* ══ VIEW SYSTEM ══ */
-    .view { display: none; }
-    .view.active { display: block; }
+/* PAGES */
+.page{display:none;min-height:calc(100vh - 62px)}
+.page.active{display:block}
+.login-page.active{display:flex}
 
-    /* ══ HERO ══ */
-    .hero {
-      background: var(--charcoal); color: var(--cream);
-      padding: 72px 5% 64px; position: relative; overflow: hidden;
-    }
-    .hero::before {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(ellipse at 80% 50%, rgba(196,98,45,0.18) 0%, transparent 65%);
-      pointer-events: none;
-    }
-    .hero-inner { max-width: 700px; }
-    .hero h1 {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(2.2rem, 5vw, 3.4rem);
-      letter-spacing: -1px; line-height: 1.1; margin-bottom: 14px;
-    }
-    .hero-tag { font-size: 1.08rem; color: rgba(250,248,243,0.6); font-weight: 300; margin-bottom: 28px; }
-    .hero-cta {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--terracotta); color: var(--cream);
-      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.92rem;
-      padding: 11px 24px; border: none; border-radius: 8px; cursor: pointer;
-      transition: opacity 0.18s, transform 0.15s;
-    }
-    .hero-cta:hover { opacity: 0.88; transform: translateY(-1px); }
+/* ── HOME ── */
+.hero{
+  position:relative;overflow:hidden;min-height:520px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#0f2a4a 0%,#1a3d6b 55%,#0d3b6e 100%);
+  text-align:center;padding:4rem 2rem 3rem;
+}
+.hero::before{
+  content:'';position:absolute;width:600px;height:600px;border-radius:50%;
+  background:rgba(30,111,255,.12);top:-200px;right:-180px;
+}
+.hero::after{
+  content:'';position:absolute;width:380px;height:380px;border-radius:50%;
+  background:rgba(30,111,255,.08);bottom:-150px;left:-100px;
+}
+.hero-inner{position:relative;z-index:1;max-width:640px}
+.hero-badge{
+  display:inline-block;margin-bottom:1.2rem;
+  background:rgba(30,111,255,.22);color:#7eb8ff;
+  border:1px solid rgba(30,111,255,.4);
+  padding:4px 14px;border-radius:20px;font-size:.78rem;font-weight:700;
+  letter-spacing:.7px;text-transform:uppercase;
+}
+.hero h1{
+  font-size:clamp(2.2rem,6vw,3.8rem);font-weight:800;color:#fff;
+  letter-spacing:-1.5px;line-height:1.1;margin-bottom:1rem;
+}
+.hero h1 span{color:#5ba4ff}
+.hero p{font-size:1.1rem;color:rgba(255,255,255,.7);line-height:1.7;margin-bottom:2rem;max-width:480px;margin-inline:auto}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-pri{
+  background:#1e6fff;color:#fff;
+  padding:12px 28px;border-radius:10px;font-weight:700;border:none;cursor:pointer;font-size:.95rem;
+  box-shadow:0 4px 14px rgba(30,111,255,.45);transition:background .18s,transform .12s;
+}
+.btn-pri:hover{background:#0f5ce8;transform:translateY(-2px)}
+.btn-out{
+  background:transparent;color:#fff;
+  padding:12px 28px;border-radius:10px;font-weight:700;cursor:pointer;font-size:.95rem;
+  border:1.5px solid rgba(255,255,255,.35);transition:background .18s,border-color .18s;
+}
+.btn-out:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.7)}
 
-    /* ══ SHARED WRAPPER ══ */
-    .content-wrap { max-width: 900px; margin: 0 auto; padding: 0 5%; }
+.stats-strip{
+  background:#fff;border-bottom:1px solid #e2e8f0;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+}
+.stat-item{padding:1.5rem 2rem;text-align:center;border-right:1px solid #e2e8f0}
+.stat-item:last-child{border-right:none}
+.stat-num{font-size:1.9rem;font-weight:800;color:#0f2a4a}
+.stat-label{font-size:.82rem;color:#475569;margin-top:2px}
 
-    /* ── SECTION BLOCK ── */
-    .sect { padding: 60px 0; }
-    .sect + .sect { border-top: 1px solid var(--light-border); }
-    h2 {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(1.45rem, 2.8vw, 1.9rem);
-      color: var(--charcoal); margin-bottom: 18px; letter-spacing: -0.4px;
-    }
-    .sect > p, .sect-lead { color: #4A4A4A; font-size: 0.98rem; max-width: 660px; }
+.about-sec{background:#f8fafc;padding:4rem 2rem}
+.sec-wrap{max-width:1100px;margin:0 auto}
+.sec-head{text-align:center;margin-bottom:3rem}
+.sec-tag{
+  display:inline-block;margin-bottom:.8rem;
+  background:#e8f0fe;color:#1e6fff;
+  padding:4px 14px;border-radius:20px;font-size:.78rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.8px;
+}
+.sec-title{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:800;color:#0f2a4a;letter-spacing:-.5px;margin-bottom:.6rem}
+.sec-sub{font-size:1rem;color:#475569;max-width:540px;margin:0 auto;line-height:1.7}
 
-    /* ── PROBLEM CARD ── */
-    .problem-card {
-      background: var(--white);
-      border: 1px solid var(--light-border); border-left: 4px solid var(--terracotta);
-      border-radius: 10px; padding: 24px 28px; margin-top: 22px;
-      font-size: 0.97rem; color: #4A4A4A;
-    }
-    .problem-card em { color: var(--terracotta); font-style: normal; font-weight: 600; }
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
+.feat-card{
+  background:#fff;border-radius:16px;border:1px solid #e2e8f0;
+  padding:1.6rem;transition:transform .18s,box-shadow .18s;
+}
+.feat-card:hover{transform:translateY(-4px);box-shadow:0 8px 32px rgba(15,42,74,.14)}
+.feat-icon{
+  width:44px;height:44px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:1rem;
+}
+.fi-blue{background:#dbeafe} .fi-green{background:#dcfce7}
+.fi-amber{background:#fef9c3} .fi-purple{background:#ede9fe}
+.feat-card h3{font-size:1rem;font-weight:700;color:#0f2a4a;margin-bottom:.4rem}
+.feat-card p{font-size:.87rem;color:#475569;line-height:1.65}
 
-    /* ── ROLES ── */
-    .roles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 24px; }
-    @media (max-width: 560px) { .roles-grid { grid-template-columns: 1fr; } }
-    .role-card {
-      background: var(--white); border: 1px solid var(--light-border);
-      border-radius: 12px; padding: 26px 24px;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .role-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.07); }
-    .role-icon { font-size: 1.9rem; margin-bottom: 12px; }
-    .role-title { font-family: 'DM Serif Display', serif; font-size: 1.15rem; color: var(--charcoal); margin-bottom: 8px; }
-    .role-desc { font-size: 0.92rem; color: var(--muted); line-height: 1.65; }
+.how-sec{background:#0f2a4a;padding:4rem 2rem}
+.how-sec .sec-title{color:#fff}
+.how-sec .sec-sub{color:rgba(255,255,255,.55)}
+.steps{display:flex;flex-wrap:wrap;justify-content:center;gap:0;margin-top:2.5rem}
+.step{flex:1;min-width:180px;max-width:240px;text-align:center;padding:1.5rem 1rem}
+.step-num{
+  width:48px;height:48px;border-radius:50%;background:#1e6fff;color:#fff;
+  font-size:1.1rem;font-weight:800;display:flex;align-items:center;justify-content:center;
+  margin:0 auto .9rem;
+}
+.step h4{color:#fff;font-size:.95rem;font-weight:700;margin-bottom:.4rem}
+.step p{color:rgba(255,255,255,.55);font-size:.82rem;line-height:1.6}
 
-    /* ── FEATURES ── */
-    .features-list { list-style: none; margin-top: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    @media (max-width: 560px) { .features-list { grid-template-columns: 1fr; } }
-    .features-list li {
-      display: flex; align-items: flex-start; gap: 12px;
-      background: var(--white); border: 1px solid var(--light-border);
-      border-radius: 10px; padding: 16px 18px; font-size: 0.94rem; color: #4A4A4A;
-    }
-    .feat-dot { width: 7px; height: 7px; background: var(--terracotta); border-radius: 50%; flex-shrink: 0; margin-top: 8px; }
+.site-footer{
+  background:#0f2a4a;color:rgba(255,255,255,.5);
+  text-align:center;padding:1.4rem 2rem;font-size:.82rem;
+}
+.site-footer strong{color:rgba(255,255,255,.85)}
 
-    /* ── HOW IT WORKS ── */
-    .steps { margin-top: 28px; position: relative; }
-    .steps::before {
-      content: ''; position: absolute; left: 22px; top: 14px; bottom: 14px;
-      width: 2px; background: var(--light-border);
-    }
-    .step { display: flex; align-items: flex-start; gap: 18px; padding: 16px 0; position: relative; z-index: 1; }
-    .step-num {
-      width: 44px; height: 44px; background: var(--charcoal); color: var(--cream);
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-family: 'DM Serif Display', serif; font-size: 1.05rem; flex-shrink: 0;
-    }
-    .step:last-child .step-num { background: var(--terracotta); }
-    .step-text h3 { font-weight: 600; font-size: 0.97rem; color: var(--charcoal); margin-bottom: 3px; }
-    .step-text p  { font-size: 0.9rem; color: var(--muted); max-width: 540px; }
+/* ── LOGIN ── */
+.login-page{
+  min-height:calc(100vh - 62px);
+  display:none;align-items:center;justify-content:center;
+  background:linear-gradient(160deg,#f0f4f8 0%,#e8f0fe 100%);
+  padding:3rem 1.5rem;
+}
+.login-wrap{width:100%;max-width:860px}
+.login-head{text-align:center;margin-bottom:2rem}
+.login-head h2{font-size:2rem;font-weight:800;color:#0f2a4a;letter-spacing:-.5px}
+.login-head p{color:#475569;margin-top:.4rem;font-size:.95rem}
+.login-toggle{
+  display:flex;gap:4px;justify-content:center;margin-bottom:2rem;
+  background:#fff;border:1px solid #e2e8f0;border-radius:10px;
+  padding:4px;width:fit-content;margin-inline:auto;
+}
+.tog-btn{
+  padding:8px 28px;border-radius:8px;border:none;cursor:pointer;
+  font-weight:700;font-size:.9rem;color:#475569;background:transparent;
+  transition:background .18s,color .18s,box-shadow .18s;
+}
+.tog-btn.active{background:#0f2a4a;color:#fff;box-shadow:0 2px 8px rgba(15,42,74,.2)}
 
-    /* ══ COMPLAINT CARD (shared) ══ */
-    .complaints-list { display: flex; flex-direction: column; gap: 12px; margin-top: 22px; }
-    .complaint-card {
-      display: flex; align-items: center; gap: 16px;
-      background: var(--white); border: 1px solid var(--light-border);
-      border-radius: 12px; padding: 18px 22px;
-      transition: box-shadow 0.2s;
-    }
-    .complaint-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
-    .complaint-icon { font-size: 1.5rem; flex-shrink: 0; }
-    .complaint-body { flex: 1; min-width: 0; }
-    .complaint-title { font-weight: 600; font-size: 0.97rem; color: var(--charcoal); margin-bottom: 2px; }
-    .complaint-meta  { font-size: 0.82rem; color: var(--muted); }
-    .badge {
-      display: inline-block; padding: 4px 12px; border-radius: 20px;
-      font-size: 0.76rem; font-weight: 600; letter-spacing: 0.04em;
-      flex-shrink: 0; white-space: nowrap;
-    }
-    .badge-open     { background: var(--open-bg);     color: var(--open-text);     }
-    .badge-progress { background: var(--progress-bg); color: var(--progress-text); }
-    .badge-resolved { background: var(--resolved-bg); color: var(--resolved-text); }
+.login-cards{display:flex;gap:24px;flex-wrap:wrap}
+.lcard{
+  flex:1;min-width:280px;
+  background:#fff;border-radius:16px;border:1px solid #e2e8f0;
+  padding:2rem;box-shadow:var(--shadow);display:none;
+}
+.lcard.show{display:block}
+.lcard-head{display:flex;align-items:center;gap:12px;margin-bottom:1.8rem}
+.lcard-icon{
+  width:42px;height:42px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.li-res{background:#dbeafe} .li-adm{background:#fce7f3}
+.lcard-head h3{font-size:1.1rem;font-weight:700;color:#0f2a4a}
+.lcard-head p{font-size:.8rem;color:#475569}
 
-    /* ══ DASHBOARD ══ */
-    .dash-header { padding: 36px 0 0; }
-    .dash-header h2 { margin-bottom: 4px; }
-    .dash-sub { font-size: 0.93rem; color: var(--muted); }
+/* FORMS */
+.fg{margin-bottom:1.2rem}
+.fg label{display:block;font-size:.82rem;font-weight:600;color:#374151;margin-bottom:5px}
+.fg input,.fg select,.fg textarea{
+  width:100%;padding:10px 14px;border-radius:6px;
+  border:1.5px solid #e2e8f0;font-size:.9rem;color:#0f2a4a;
+  background:#f8fafc;outline:none;transition:border-color .18s,box-shadow .18s;
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus{
+  border-color:#1e6fff;box-shadow:0 0 0 3px rgba(30,111,255,.12);
+}
+.fg textarea{resize:vertical;min-height:90px}
+.fbtn{
+  width:100%;padding:11px;border-radius:10px;
+  background:#0f2a4a;color:#fff;border:none;cursor:pointer;
+  font-weight:700;font-size:.95rem;transition:background .18s,transform .1s;
+}
+.fbtn:hover{background:#1a3d6b;transform:translateY(-1px)}
+.fbtn.blue{background:#1e6fff}
+.fbtn.blue:hover{background:#0f5ce8}
+.form-foot{text-align:center;margin-top:1rem;font-size:.82rem;color:#475569}
 
-    .dash-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 28px 0 0; }
-    @media (max-width: 520px) { .dash-stats { grid-template-columns: 1fr; } }
-    .stat-card {
-      background: var(--white); border: 1px solid var(--light-border);
-      border-radius: 12px; padding: 22px 20px; text-align: center;
-    }
-    .stat-num { font-family: 'DM Serif Display', serif; font-size: 2.4rem; line-height: 1; margin-bottom: 6px; }
-    .stat-card.s-open     .stat-num { color: var(--open-text);     }
-    .stat-card.s-progress .stat-num { color: var(--progress-text); }
-    .stat-card.s-resolved .stat-num { color: var(--resolved-text); }
-    .stat-label { font-size: 0.82rem; color: var(--muted); font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+/* ── DASHBOARD ── */
+.dash-page{background:#f8fafc;display:none}
+.dash-page.active{display:block}
+.dash-hdr{
+  background:#fff;border-bottom:1px solid #e2e8f0;
+  padding:1.4rem 2rem;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+}
+.dash-hdr-l h2{font-size:1.3rem;font-weight:800;color:#0f2a4a}
+.dash-hdr-l p{font-size:.85rem;color:#475569;margin-top:2px}
+.view-tog{
+  display:flex;gap:4px;background:#f0f4f8;
+  border:1px solid #e2e8f0;border-radius:10px;padding:3px;
+}
+.vbtn{
+  padding:7px 18px;border-radius:8px;border:none;cursor:pointer;
+  font-size:.85rem;font-weight:600;color:#475569;background:transparent;transition:.15s;
+}
+.vbtn.active{background:#0f2a4a;color:#fff}
 
-    .filter-bar { display: flex; align-items: center; gap: 8px; margin: 28px 0 0; flex-wrap: wrap; }
-    .filter-label { font-size: 0.79rem; color: var(--muted); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-right: 4px; }
-    .filter-btn {
-      background: var(--white); border: 1px solid var(--light-border); border-radius: 20px;
-      padding: 6px 16px;
-      font-family: 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 500; color: var(--muted);
-      cursor: pointer; transition: background 0.16s, color 0.16s, border-color 0.16s;
-    }
-    .filter-btn:hover { border-color: var(--terracotta); color: var(--terracotta); }
-    .filter-btn.active { background: var(--charcoal); border-color: var(--charcoal); color: var(--cream); }
+.dash-body{padding:2rem;max-width:1100px;margin:0 auto}
 
-    .ticket-note {
-      font-size: 0.81rem; color: var(--muted);
-      margin-top: 5px; padding-top: 5px;
-      border-top: 1px dashed var(--light-border);
-    }
-    .ticket-note span { color: var(--terracotta); font-weight: 600; }
+.raise-card{
+  background:#fff;border-radius:16px;border:1px solid #e2e8f0;
+  padding:2rem;box-shadow:var(--shadow);max-width:600px;
+}
+.raise-card h3{font-size:1.15rem;font-weight:800;color:#0f2a4a;margin-bottom:.3rem}
+.raise-card>p{font-size:.87rem;color:#475569;margin-bottom:1.6rem}
 
-    .empty-state { text-align: center; padding: 48px 0; color: var(--muted); display: none; }
-    .empty-icon { font-size: 2.4rem; margin-bottom: 12px; }
-    .empty-state p { font-size: 0.93rem; color: var(--muted); margin: 0 auto; }
+.admin-stats{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:14px;margin-bottom:2rem;
+}
+.astat{
+  background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:1rem 1.2rem;
+}
+.astat-num{font-size:1.9rem;font-weight:800;color:#0f2a4a}
+.astat-lbl{font-size:.78rem;color:#475569;margin-top:2px}
 
-    /* ══ RAISE COMPLAINT ══ */
-    .form-wrap { padding: 48px 0 64px; }
-    .form-wrap h2 { margin-bottom: 6px; }
-    .form-lead { font-size: 0.95rem; color: var(--muted); margin-bottom: 28px; }
+.filter-bar{display:flex;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap}
+.fbtn2{
+  padding:7px 18px;border-radius:20px;border:1.5px solid #e2e8f0;
+  background:#fff;color:#475569;font-size:.83rem;font-weight:600;cursor:pointer;transition:.15s;
+}
+.fbtn2:hover{border-color:#1e6fff;color:#1e6fff}
+.fbtn2.active{background:#1e6fff;border-color:#1e6fff;color:#fff}
 
-    .form-card {
-      background: var(--white); border: 1px solid var(--light-border);
-      border-radius: 14px; padding: 32px 32px 28px;
-    }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 540px) { .form-grid { grid-template-columns: 1fr; } }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-group.full { grid-column: 1 / -1; }
-    label { font-size: 0.79rem; font-weight: 600; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
-    input, textarea, select {
-      font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
-      border: 1px solid var(--light-border); border-radius: 8px;
-      padding: 10px 13px; background: var(--cream); color: var(--charcoal);
-      transition: border-color 0.2s; outline: none; resize: vertical;
-    }
-    input:focus, textarea:focus, select:focus { border-color: var(--terracotta); }
-    textarea { min-height: 90px; }
+.comp-grid{display:grid;gap:14px}
+.ccard{
+  background:#fff;border-radius:16px;border:1px solid #e2e8f0;
+  padding:1.4rem 1.6rem;display:grid;grid-template-columns:1fr auto;
+  align-items:start;gap:12px;transition:box-shadow .18s;
+}
+.ccard:hover{box-shadow:var(--shadow)}
+.ccard.hide{display:none}
+.ctitle{font-weight:700;color:#0f2a4a;font-size:.97rem;margin-bottom:4px}
+.cmeta{font-size:.8rem;color:#475569}
+.cmeta span{margin-right:12px}
+.cdesc{font-size:.85rem;color:#475569;margin-top:6px;line-height:1.6}
 
-    .form-footer { display: flex; align-items: center; gap: 20px; margin-top: 20px; flex-wrap: wrap; }
-    .btn-submit {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--charcoal); color: var(--cream);
-      font-family: 'DM Sans', sans-serif; font-size: 0.94rem; font-weight: 600;
-      padding: 12px 28px; border: none; border-radius: 8px; cursor: pointer;
-      letter-spacing: 0.02em; transition: background 0.2s, transform 0.15s;
-    }
-    .btn-submit:hover { background: var(--terracotta); transform: translateY(-1px); }
-    .form-hint { font-size: 0.79rem; color: var(--muted); }
+.badge{
+  padding:4px 12px;border-radius:20px;font-size:.74rem;font-weight:700;
+  white-space:nowrap;text-transform:uppercase;letter-spacing:.4px;
+}
+.b-open{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+.b-prog{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.b-done{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
 
-    /* Validation highlight */
-    .field-error { border-color: var(--terracotta) !important; }
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.d-hi{background:#ef4444} .d-md{background:#f59e0b} .d-lo{background:#22c55e}
 
-    /* Success banner */
-    .success-banner {
-      display: none; align-items: flex-start; gap: 14px;
-      background: var(--resolved-bg); border: 1px solid #b6e0c8;
-      border-radius: 10px; padding: 20px 24px; margin-bottom: 24px;
-    }
-    .success-banner.show { display: flex; }
-    .success-icon { font-size: 1.6rem; flex-shrink: 0; margin-top: 2px; }
-    .success-title { font-weight: 600; font-size: 0.97rem; color: #1f6b3e; margin-bottom: 3px; }
-    .success-msg   { font-size: 0.88rem; color: #2e7d50; }
-    .success-banner .btn-new {
-      margin-top: 12px;
-      display: inline-flex; align-items: center; gap: 6px;
-      background: var(--charcoal); color: var(--cream);
-      font-family: 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 600;
-      padding: 9px 20px; border: none; border-radius: 7px; cursor: pointer;
-      transition: background 0.18s;
-    }
-    .success-banner .btn-new:hover { background: var(--terracotta); }
-
-    /* ══ FOOTER ══ */
-    footer {
-      background: var(--charcoal); color: rgba(250,248,243,0.38);
-      text-align: center; padding: 24px 5%; font-size: 0.82rem;
-    }
-    footer strong { color: rgba(250,248,243,0.7); }
-  </style>
+/* RESPONSIVE */
+@media(max-width:700px){
+  .navbar-links{
+    display:none;flex-direction:column;gap:6px;
+    position:absolute;top:62px;left:0;right:0;
+    background:#0f2a4a;padding:1rem;
+  }
+  .navbar-links.open{display:flex}
+  .hamburger{display:block}
+  .login-cards{flex-direction:column}
+  .hero h1{font-size:2rem}
+  .dash-hdr{flex-direction:column;align-items:flex-start}
+}
+</style>
 </head>
 <body>
 
-  <!-- ══ STICKY NAV ══ -->
-  <nav class="topbar">
-    <div class="topbar-brand" onclick="showView('home')">
-      <div class="topbar-logo">🔧</div>
-      <span class="topbar-name">CribFix</span>
-    </div>
-    <ul class="nav-tabs">
-      <li><button id="tab-home"  class="active" onclick="showView('home')">Home</button></li>
-      <li><button id="tab-dash"                 onclick="showView('dash')">Dashboard</button></li>
-      <li><button id="tab-raise"                onclick="showView('raise')">Raise Complaint</button></li>
-    </ul>
-  </nav>
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <div class="brand-icon">🏢</div>CribFix
+  </div>
+  <ul class="navbar-links" id="navLinks">
+    <li><span class="nav-link active" onclick="go('home',this)">Home</span></li>
+    <li><span class="nav-link" onclick="go('login',this)">Login</span></li>
+    <li><span class="nav-link" onclick="go('dash',this)">Dashboard</span></li>
+  </ul>
+  <button class="hamburger" onclick="toggleNav()" aria-label="menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
 
+<!-- HOME PAGE -->
+<section class="page active" id="page-home">
 
-  <!-- ══════════════════════════════════════
-       VIEW 1 — HOME
-  ══════════════════════════════════════ -->
-  <div id="view-home" class="view active">
-
-    <div class="hero">
-      <div class="hero-inner">
-        <h1>Apartment maintenance,<br>finally organised.</h1>
-        <p class="hero-tag">A simple way to manage apartment complaints — no more lost WhatsApp messages.</p>
-        <button class="hero-cta" onclick="showView('raise')">Raise a Complaint →</button>
+  <div class="hero">
+    <div class="hero-inner">
+      <span class="hero-badge">✦ Maintenance Simplified</span>
+      <h1>Welcome to <span>CribFix</span></h1>
+      <p>A simple, modern way to manage apartment maintenance requests — no more WhatsApp chaos or missed calls.</p>
+      <div class="hero-btns">
+        <button class="btn-pri" onclick="go('login',document.querySelectorAll('.nav-link')[1])">Get Started</button>
+        <button class="btn-out" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">Learn More</button>
       </div>
     </div>
+  </div>
 
-    <div class="content-wrap">
+  <div class="stats-strip">
+    <div class="stat-item"><div class="stat-num">500+</div><div class="stat-label">Issues Resolved</div></div>
+    <div class="stat-item"><div class="stat-num">3x</div><div class="stat-label">Faster Resolution</div></div>
+    <div class="stat-item"><div class="stat-num">98%</div><div class="stat-label">Resident Satisfaction</div></div>
+    <div class="stat-item"><div class="stat-num">24/7</div><div class="stat-label">Ticket Tracking</div></div>
+  </div>
 
-      <div class="sect">
-        <h2>The Problem</h2>
-        <p>Most apartment buildings manage maintenance issues through informal channels — a WhatsApp group here, a phone call there. Complaints get buried in chat history, forgotten by staff, or simply never followed up.</p>
-        <div class="problem-card">
-          Residents raise an issue and then <em>have no idea</em> whether it was seen, assigned, or resolved. There's no record, no accountability, and no peace of mind. CribFix fixes that by giving every complaint a home.
+  <div class="about-sec" id="about">
+    <div class="sec-wrap">
+      <div class="sec-head">
+        <span class="sec-tag">About CribFix</span>
+        <h2 class="sec-title">Your building, better managed</h2>
+        <p class="sec-sub">CribFix replaces chaotic WhatsApp groups and unanswered calls with a clean, trackable system everyone can trust.</p>
+      </div>
+      <div class="feat-grid">
+        <div class="feat-card"><div class="feat-icon fi-blue">📋</div><h3>Structured Complaints</h3><p>Residents submit issues with categories, descriptions, and priority — no more vague messages at midnight.</p></div>
+        <div class="feat-card"><div class="feat-icon fi-green">✅</div><h3>Real-time Status</h3><p>Track every ticket from Open → In Progress → Resolved. Everyone stays on the same page.</p></div>
+        <div class="feat-card"><div class="feat-icon fi-amber">⚡</div><h3>Admin Dashboard</h3><p>Admins get a clear overview of all pending issues, filter by status, and act instantly.</p></div>
+        <div class="feat-card"><div class="feat-icon fi-purple">🔒</div><h3>Secure Dual Login</h3><p>Separate portals for residents and admins ensure the right people see the right information.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="how-sec">
+    <div class="sec-wrap">
+      <div class="sec-head">
+        <span class="sec-tag" style="background:rgba(30,111,255,.22);color:#7eb8ff;">How It Works</span>
+        <h2 class="sec-title">Three steps to a fixed crib</h2>
+        <p class="sec-sub" style="color:rgba(255,255,255,.55);">From complaint to resolution — clean, fast, and transparent.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><h4>Submit a Ticket</h4><p>Resident fills a structured form with category and details.</p></div>
+        <div class="step"><div class="step-num">2</div><h4>Admin Reviews</h4><p>Admin sees it on the dashboard and updates the status.</p></div>
+        <div class="step"><div class="step-num">3</div><h4>Issue Resolved</h4><p>Resident sees the ticket marked resolved. No follow-up calls needed.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer"><strong>CribFix</strong> &mdash; Making apartment living smoother, one ticket at a time. &copy; 2025</footer>
+</section>
+
+<!-- LOGIN PAGE -->
+<section class="page login-page" id="page-login">
+  <div class="login-wrap">
+    <div class="login-head">
+      <h2>Welcome back 👋</h2>
+      <p>Sign in to your CribFix account to continue</p>
+    </div>
+    <div class="login-toggle">
+      <button class="tog-btn active" id="tog-res" onclick="switchLogin('res')">🏠 Resident</button>
+      <button class="tog-btn" id="tog-adm" onclick="switchLogin('adm')">🛠️ Admin</button>
+    </div>
+    <div class="login-cards">
+
+      <div class="lcard show" id="card-res">
+        <div class="lcard-head">
+          <div class="lcard-icon li-res">🏠</div>
+          <div><h3>Resident Login</h3><p>Access your complaint portal</p></div>
         </div>
+        <div class="fg"><label>Email Address</label><input type="email" placeholder="you@example.com"/></div>
+        <div class="fg"><label>Password</label><input type="password" placeholder="••••••••"/></div>
+        <button class="fbtn blue" onclick="doLogin('res')">Sign in as Resident</button>
+        <p class="form-foot">No account? <a href="#" style="color:#1e6fff">Contact your admin</a></p>
       </div>
 
-      <div class="sect">
-        <h2>Who Uses CribFix?</h2>
-        <p>The system is designed around two clear roles, each with a focused set of actions.</p>
-        <div class="roles-grid">
-          <div class="role-card">
-            <div class="role-icon">🏠</div>
-            <div class="role-title">Resident</div>
-            <p class="role-desc">Raise a new maintenance complaint, describe the issue, pick a category, and then track its status in real time — right from a simple dashboard.</p>
-          </div>
-          <div class="role-card">
-            <div class="role-icon">🛠️</div>
-            <div class="role-title">Admin / Staff</div>
-            <p class="role-desc">View all complaints across the building, update their status as work progresses, and add notes so residents always know what is happening.</p>
-          </div>
+      <div class="lcard" id="card-adm">
+        <div class="lcard-head">
+          <div class="lcard-icon li-adm">🛠️</div>
+          <div><h3>Admin Login</h3><p>Manage building complaints</p></div>
         </div>
+        <div class="fg"><label>Admin Email</label><input type="email" placeholder="admin@cribfix.io"/></div>
+        <div class="fg"><label>Password</label><input type="password" placeholder="••••••••"/></div>
+        <div class="fg"><label>Building / Property Code</label><input type="text" placeholder="e.g. BLK-A-42"/></div>
+        <button class="fbtn" onclick="doLogin('adm')">Sign in as Admin</button>
+        <p class="form-foot">Forgot credentials? <a href="#" style="color:#1e6fff">Reset here</a></p>
       </div>
 
-      <div class="sect">
-        <h2>Key Features</h2>
-        <p>Everything you need, nothing you don't. CribFix keeps things focused and easy to use.</p>
-        <ul class="features-list">
-          <li><span class="feat-dot"></span>Submit a complaint with a title, description, and category</li>
-          <li><span class="feat-dot"></span>Three clear statuses: Open, In Progress, and Resolved</li>
-          <li><span class="feat-dot"></span>Admins can add internal notes to each complaint</li>
-          <li><span class="feat-dot"></span>Residents can view all their own complaints in one place</li>
-          <li><span class="feat-dot"></span>Admin dashboard shows all complaints across the building</li>
-          <li><span class="feat-dot"></span>Status updates reflected immediately — no refreshing needed</li>
-        </ul>
-      </div>
+    </div>
+  </div>
+</section>
 
-      <div class="sect">
-        <h2>How It Works</h2>
-        <p>A simple four-step flow that keeps everyone in the loop.</p>
-        <div class="steps">
-          <div class="step">
-            <div class="step-num">1</div>
-            <div class="step-text">
-              <h3>Resident Raises a Complaint</h3>
-              <p>Fill in the complaint form with a title, description, and category. The complaint is saved and immediately visible to admins.</p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-num">2</div>
-            <div class="step-text">
-              <h3>Admin Reviews &amp; Acknowledges</h3>
-              <p>The building admin or maintenance staff sees the new ticket and moves it to "In Progress" when work begins.</p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-num">3</div>
-            <div class="step-text">
-              <h3>Notes Are Added Along the Way</h3>
-              <p>Admins attach updates — such as "Plumber arriving Thursday" — so the resident always knows what's happening.</p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-num">4</div>
-            <div class="step-text">
-              <h3>Issue Marked Resolved</h3>
-              <p>Once work is complete, the complaint is marked Resolved. The resident can see the final status and any closing notes at any time.</p>
-            </div>
-          </div>
+<!-- DASHBOARD PAGE -->
+<section class="page dash-page" id="page-dash">
+  <div class="dash-hdr">
+    <div class="dash-hdr-l">
+      <h2 id="dash-title">My Dashboard</h2>
+      <p id="dash-sub">Raise and track your maintenance requests</p>
+    </div>
+    <div class="view-tog">
+      <button class="vbtn active" id="vbtn-res" onclick="setView('res')">Resident View</button>
+      <button class="vbtn" id="vbtn-adm" onclick="setView('adm')">Admin View</button>
+    </div>
+  </div>
+
+  <div class="dash-body">
+
+    <!-- RESIDENT VIEW -->
+    <div id="v-res">
+      <div class="raise-card">
+        <h3>🔧 Raise a Complaint</h3>
+        <p>Fill in the form below and our team will get on it ASAP.</p>
+        <div class="fg"><label>Complaint Title</label><input type="text" id="c-title" placeholder="e.g. Leaking pipe under kitchen sink"/></div>
+        <div class="fg">
+          <label>Category</label>
+          <select id="c-cat">
+            <option value="">— Select a category —</option>
+            <option>🚿 Plumbing</option>
+            <option>⚡ Electrical</option>
+            <option>🪟 Windows &amp; Doors</option>
+            <option>🛗 Lift / Elevator</option>
+            <option>🏗️ Structural</option>
+            <option>🧹 Common Area Cleaning</option>
+            <option>🔒 Security</option>
+            <option>❄️ HVAC / Air Conditioning</option>
+            <option>🌐 Internet / Wi-Fi</option>
+            <option>🔧 Other</option>
+          </select>
         </div>
-      </div>
-
-    </div><!-- /content-wrap -->
-  </div><!-- /view-home -->
-
-
-  <!-- ══════════════════════════════════════
-       VIEW 2 — DASHBOARD
-  ══════════════════════════════════════ -->
-  <div id="view-dash" class="view">
-    <div class="content-wrap">
-
-      <div class="dash-header">
-        <h2>Complaints Dashboard</h2>
-        <p class="dash-sub">All tickets raised across the building — filter by status below.</p>
-      </div>
-
-      <!-- Summary stats -->
-      <div class="dash-stats">
-        <div class="stat-card s-open">
-          <div class="stat-num">3</div>
-          <div class="stat-label">Open</div>
+        <div class="fg">
+          <label>Priority</label>
+          <select id="c-pri">
+            <option>🔴 High — Urgent, affects daily life</option>
+            <option selected>🟡 Medium — Needs fixing soon</option>
+            <option>🟢 Low — Minor inconvenience</option>
+          </select>
         </div>
-        <div class="stat-card s-progress">
-          <div class="stat-num">2</div>
-          <div class="stat-label">In Progress</div>
-        </div>
-        <div class="stat-card s-resolved">
-          <div class="stat-num">2</div>
-          <div class="stat-label">Resolved</div>
-        </div>
+        <div class="fg"><label>Description</label><textarea id="c-desc" placeholder="Describe the issue — location, when it started, how bad it is…"></textarea></div>
+        <button class="fbtn blue" onclick="submitComp()">Submit Complaint →</button>
       </div>
+    </div>
 
-      <!-- Filter bar -->
+    <!-- ADMIN VIEW -->
+    <div id="v-adm" style="display:none">
+      <div class="admin-stats">
+        <div class="astat"><div class="astat-num" style="color:#ef4444">3</div><div class="astat-lbl">Open</div></div>
+        <div class="astat"><div class="astat-num" style="color:#f59e0b">2</div><div class="astat-lbl">In Progress</div></div>
+        <div class="astat"><div class="astat-num" style="color:#22c55e">4</div><div class="astat-lbl">Resolved</div></div>
+        <div class="astat"><div class="astat-num">9</div><div class="astat-lbl">Total Tickets</div></div>
+      </div>
       <div class="filter-bar">
-        <span class="filter-label">Filter:</span>
-        <button class="filter-btn active" onclick="filterTickets('all', this)">All</button>
-        <button class="filter-btn" onclick="filterTickets('open', this)">Open</button>
-        <button class="filter-btn" onclick="filterTickets('progress', this)">In Progress</button>
-        <button class="filter-btn" onclick="filterTickets('resolved', this)">Resolved</button>
+        <button class="fbtn2 active" onclick="filterCards('all',this)">All</button>
+        <button class="fbtn2" onclick="filterCards('open',this)">Open</button>
+        <button class="fbtn2" onclick="filterCards('progress',this)">In Progress</button>
+        <button class="fbtn2" onclick="filterCards('resolved',this)">Resolved</button>
       </div>
+      <div class="comp-grid" id="comp-list">
 
-      <!-- Ticket list -->
-      <div id="ticket-list" class="complaints-list" style="margin-bottom: 64px;">
-
-        <div class="complaint-card" data-status="open">
-          <div class="complaint-icon">💧</div>
-          <div class="complaint-body">
-            <div class="complaint-title">Water leakage in bathroom ceiling</div>
-            <div class="complaint-meta">Flat A-101 &nbsp;·&nbsp; Plumbing &nbsp;·&nbsp; Raised 2 days ago</div>
-          </div>
-          <span class="badge badge-open">Open</span>
+        <div class="ccard" data-s="open">
+          <div><div class="ctitle"><span class="dot d-hi"></span>Water leakage in bathroom — Flat 4B</div>
+          <div class="cmeta"><span>🚿 Plumbing</span><span>🗓️ June 12, 2025</span><span>👤 Rahul Mehta</span></div>
+          <div class="cdesc">Persistent water leak under the bathroom vanity. Water pooling on the floor since last night. Causing dampness on the wall.</div></div>
+          <span class="badge b-open">Open</span>
         </div>
 
-        <div class="complaint-card" data-status="progress">
-          <div class="complaint-icon">🛗</div>
-          <div class="complaint-body">
-            <div class="complaint-title">Lift making grinding noise on 3rd floor</div>
-            <div class="complaint-meta">Flat C-305 &nbsp;·&nbsp; Lift / Elevator &nbsp;·&nbsp; Raised 5 days ago</div>
-            <div class="ticket-note"><span>Admin note:</span> Technician scheduled for Friday morning.</div>
-          </div>
-          <span class="badge badge-progress">In Progress</span>
+        <div class="ccard" data-s="progress">
+          <div><div class="ctitle"><span class="dot d-hi"></span>Lift stuck on 3rd floor</div>
+          <div class="cmeta"><span>🛗 Lift</span><span>🗓️ June 11, 2025</span><span>👤 Priya Sharma</span></div>
+          <div class="cdesc">Elevator doors not closing properly. Getting stuck between floor 3 and 4. Engineer contacted and on the way.</div></div>
+          <span class="badge b-prog">In Progress</span>
         </div>
 
-        <div class="complaint-card" data-status="resolved">
-          <div class="complaint-icon">💡</div>
-          <div class="complaint-body">
-            <div class="complaint-title">Corridor light not working on 2nd floor</div>
-            <div class="complaint-meta">Flat B-202 &nbsp;·&nbsp; Electrical &nbsp;·&nbsp; Raised 10 days ago</div>
-            <div class="ticket-note"><span>Admin note:</span> Bulb replaced on 6 Apr. Closed.</div>
-          </div>
-          <span class="badge badge-resolved">Resolved</span>
+        <div class="ccard" data-s="resolved">
+          <div><div class="ctitle"><span class="dot d-lo"></span>Flickering light in corridor — Block C</div>
+          <div class="cmeta"><span>⚡ Electrical</span><span>🗓️ June 9, 2025</span><span>👤 Aditya Nair</span></div>
+          <div class="cdesc">Tube light on floor 2 corridor was flickering. Replaced with a new LED fixture. Issue fully resolved.</div></div>
+          <span class="badge b-done">Resolved</span>
         </div>
 
-        <div class="complaint-card" data-status="open">
-          <div class="complaint-icon">🐜</div>
-          <div class="complaint-body">
-            <div class="complaint-title">Ant infestation near the stairwell entrance</div>
-            <div class="complaint-meta">Flat D-401 &nbsp;·&nbsp; Pest Control &nbsp;·&nbsp; Raised 1 day ago</div>
-          </div>
-          <span class="badge badge-open">Open</span>
+        <div class="ccard" data-s="open">
+          <div><div class="ctitle"><span class="dot d-md"></span>Broken window latch — Flat 7A</div>
+          <div class="cmeta"><span>🪟 Windows</span><span>🗓️ June 13, 2025</span><span>👤 Sneha Joshi</span></div>
+          <div class="cdesc">Living room window doesn't lock properly. Security concern especially at night. Needs immediate attention.</div></div>
+          <span class="badge b-open">Open</span>
         </div>
 
-        <div class="complaint-card" data-status="progress">
-          <div class="complaint-icon">🚰</div>
-          <div class="complaint-body">
-            <div class="complaint-title">Low water pressure on 4th floor taps</div>
-            <div class="complaint-meta">Flat E-403 &nbsp;·&nbsp; Plumbing &nbsp;·&nbsp; Raised 3 days ago</div>
-            <div class="ticket-note"><span>Admin note:</span> Checking the pump room today.</div>
-          </div>
-          <span class="badge badge-progress">In Progress</span>
+        <div class="ccard" data-s="progress">
+          <div><div class="ctitle"><span class="dot d-md"></span>AC not cooling in master bedroom</div>
+          <div class="cmeta"><span>❄️ HVAC</span><span>🗓️ June 10, 2025</span><span>👤 Vikram Bose</span></div>
+          <div class="cdesc">Split AC stopped cooling. Technician checked gas levels — refill scheduled for tomorrow morning.</div></div>
+          <span class="badge b-prog">In Progress</span>
         </div>
 
-        <div class="complaint-card" data-status="resolved">
-          <div class="complaint-icon">🚪</div>
-          <div class="complaint-body">
-            <div class="complaint-title">Main gate intercom not ringing</div>
-            <div class="complaint-meta">Flat F-102 &nbsp;·&nbsp; Common Area &nbsp;·&nbsp; Raised 8 days ago</div>
-            <div class="ticket-note"><span>Admin note:</span> Wiring fixed by electrician. Verified working.</div>
-          </div>
-          <span class="badge badge-resolved">Resolved</span>
+        <div class="ccard" data-s="resolved">
+          <div><div class="ctitle"><span class="dot d-lo"></span>Lobby Wi-Fi not working</div>
+          <div class="cmeta"><span>🌐 Internet</span><span>🗓️ June 7, 2025</span><span>👤 Meera Pillai</span></div>
+          <div class="cdesc">Common area Wi-Fi router restarted and reconfigured. Back to normal speed now.</div></div>
+          <span class="badge b-done">Resolved</span>
         </div>
 
-        <div class="complaint-card" data-status="open">
-          <div class="complaint-icon">🌧️</div>
-          <div class="complaint-body">
-            <div class="complaint-title">Roof terrace drain blocked after rain</div>
-            <div class="complaint-meta">Flat G-501 &nbsp;·&nbsp; Common Area &nbsp;·&nbsp; Raised today</div>
-          </div>
-          <span class="badge badge-open">Open</span>
+        <div class="ccard" data-s="open">
+          <div><div class="ctitle"><span class="dot d-hi"></span>Main gate lock broken</div>
+          <div class="cmeta"><span>🔒 Security</span><span>🗓️ June 14, 2025</span><span>👤 Rajan Kumar</span></div>
+          <div class="cdesc">Main entrance electronic lock malfunctioning. Gate stays open — urgent security issue for all residents.</div></div>
+          <span class="badge b-open">Open</span>
         </div>
 
-        <!-- empty state -->
-        <div class="empty-state" id="empty-state">
-          <div class="empty-icon">🗂️</div>
-          <p>No complaints match this filter.</p>
+        <div class="ccard" data-s="resolved">
+          <div><div class="ctitle"><span class="dot d-lo"></span>Dustbin overflow near parking</div>
+          <div class="cmeta"><span>🧹 Cleaning</span><span>🗓️ June 8, 2025</span><span>👤 Ananya Das</span></div>
+          <div class="cdesc">Parking level bins were overflowing. Housekeeping team cleared and sanitised the area.</div></div>
+          <span class="badge b-done">Resolved</span>
+        </div>
+
+        <div class="ccard" data-s="resolved">
+          <div><div class="ctitle"><span class="dot d-lo"></span>Cracked tile in stairwell</div>
+          <div class="cmeta"><span>🏗️ Structural</span><span>🗓️ June 5, 2025</span><span>👤 Kavya Reddy</span></div>
+          <div class="cdesc">Chipped tile on 2nd floor stairway landing posed a trip hazard. Replaced and sealed.</div></div>
+          <span class="badge b-done">Resolved</span>
         </div>
 
       </div>
-    </div>
-  </div><!-- /view-dash -->
+    </div><!-- /v-adm -->
 
+  </div><!-- /dash-body -->
+</section>
 
-  <!-- ══════════════════════════════════════
-       VIEW 3 — RAISE COMPLAINT
-  ══════════════════════════════════════ -->
-  <div id="view-raise" class="view">
-    <div class="content-wrap">
-      <div class="form-wrap">
-        <h2>Raise a Complaint</h2>
-        <p class="form-lead">Fill in the details below and your complaint will be logged and assigned to the maintenance team.</p>
+<script>
+// ── Navigation ──
+function go(pageId, navEl){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  document.getElementById('page-'+pageId).classList.add('active');
+  if(navEl) navEl.classList.add('active');
+  document.getElementById('navLinks').classList.remove('open');
+}
+function toggleNav(){
+  document.getElementById('navLinks').classList.toggle('open');
+}
 
-        <!-- Success banner -->
-        <div class="success-banner" id="success-banner">
-          <div class="success-icon">✅</div>
-          <div>
-            <div class="success-title">Complaint submitted successfully!</div>
-            <p class="success-msg">Your ticket has been logged. The admin team will review it shortly. Track its progress from the Dashboard.</p>
-            <button class="btn-new" onclick="resetForm()">+ Raise another complaint</button>
-          </div>
-        </div>
+// ── Login toggle ──
+function switchLogin(type){
+  var r=document.getElementById('card-res'),
+      a=document.getElementById('card-adm'),
+      tr=document.getElementById('tog-res'),
+      ta=document.getElementById('tog-adm');
+  if(type==='res'){
+    r.classList.add('show'); a.classList.remove('show');
+    tr.classList.add('active'); ta.classList.remove('active');
+  } else {
+    a.classList.add('show'); r.classList.remove('show');
+    ta.classList.add('active'); tr.classList.remove('active');
+  }
+}
+function doLogin(type){
+  go('dash', document.querySelectorAll('.nav-link')[2]);
+  setView(type);
+}
 
-        <!-- Form -->
-        <div class="form-card" id="complaint-form-card">
-          <div class="form-grid">
-            <div class="form-group full">
-              <label>Complaint Title</label>
-              <input id="f-title" type="text" placeholder="e.g. Water leakage in bathroom ceiling"/>
-            </div>
-            <div class="form-group">
-              <label>Category</label>
-              <select id="f-cat">
-                <option value="">— Select a category —</option>
-                <option>Plumbing</option>
-                <option>Electrical</option>
-                <option>Lift / Elevator</option>
-                <option>Common Area</option>
-                <option>Pest Control</option>
-                <option>Other</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Flat / Unit Number</label>
-              <input id="f-flat" type="text" placeholder="e.g. B-204"/>
-            </div>
-            <div class="form-group full">
-              <label>Priority</label>
-              <select id="f-priority">
-                <option>Low — Can wait a few days</option>
-                <option>Medium — Needs attention soon</option>
-                <option>High — Urgent issue</option>
-              </select>
-            </div>
-            <div class="form-group full">
-              <label>Description</label>
-              <textarea id="f-desc" placeholder="Describe the issue — when it started, how severe it is, and anything else that might help the team..."></textarea>
-            </div>
-          </div>
-          <div class="form-footer">
-            <button class="btn-submit" onclick="submitComplaint()">Submit Complaint →</button>
-            <span class="form-hint">All fields are required.</span>
-          </div>
-        </div>
+// ── Dashboard view ──
+function setView(type){
+  var vr=document.getElementById('v-res'),
+      va=document.getElementById('v-adm'),
+      br=document.getElementById('vbtn-res'),
+      ba=document.getElementById('vbtn-adm'),
+      t=document.getElementById('dash-title'),
+      s=document.getElementById('dash-sub');
+  if(type==='res'){
+    vr.style.display='block'; va.style.display='none';
+    br.classList.add('active'); ba.classList.remove('active');
+    t.textContent='My Dashboard';
+    s.textContent='Raise and track your maintenance requests';
+  } else {
+    va.style.display='block'; vr.style.display='none';
+    ba.classList.add('active'); br.classList.remove('active');
+    t.textContent='Admin Dashboard';
+    s.textContent='Manage and resolve building complaints';
+  }
+}
 
-      </div>
-    </div>
-  </div><!-- /view-raise -->
+// ── Submit complaint ──
+function submitComp(){
+  var title=document.getElementById('c-title').value.trim(),
+      cat=document.getElementById('c-cat').value,
+      desc=document.getElementById('c-desc').value.trim();
+  if(!title||!cat||!desc){
+    alert('⚠️ Please fill in all fields before submitting.');
+    return;
+  }
+  alert('✅ Complaint Submitted Successfully!\n\nYour ticket has been logged. Our team will get back to you shortly.');
+  document.getElementById('c-title').value='';
+  document.getElementById('c-cat').value='';
+  document.getElementById('c-desc').value='';
+}
 
-
-  <!-- ══ FOOTER ══ -->
-  <footer>
-    <strong>CribFix</strong> &nbsp;—&nbsp; Apartment Maintenance Ticket System &nbsp;·&nbsp; Static demo only
-  </footer>
-
-
-  <!-- ══ JAVASCRIPT ══ -->
-  <script>
-    /* ── View Switcher ── */
-    function showView(id) {
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
-      document.getElementById('view-' + id).classList.add('active');
-      document.getElementById('tab-' + id).classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+// ── Filter complaints ──
+function filterCards(status, btn){
+  document.querySelectorAll('.fbtn2').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.ccard').forEach(function(card){
+    if(status==='all'){ card.classList.remove('hide'); }
+    else {
+      card.getAttribute('data-s')===status
+        ? card.classList.remove('hide')
+        : card.classList.add('hide');
     }
-
-    /* ── Dashboard Filter ── */
-    function filterTickets(status, btn) {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const cards = document.querySelectorAll('#ticket-list .complaint-card');
-      let visible = 0;
-      cards.forEach(card => {
-        const show = status === 'all' || card.dataset.status === status;
-        card.style.display = show ? 'flex' : 'none';
-        if (show) visible++;
-      });
-      document.getElementById('empty-state').style.display = visible === 0 ? 'block' : 'none';
-    }
-
-    /* ── Form Validation & Submit ── */
-    function submitComplaint() {
-      const fields = [
-        document.getElementById('f-title'),
-        document.getElementById('f-cat'),
-        document.getElementById('f-flat'),
-        document.getElementById('f-desc'),
-      ];
-
-      let valid = true;
-      fields.forEach(f => {
-        f.classList.remove('field-error');
-        if (!f.value.trim()) { f.classList.add('field-error'); valid = false; }
-      });
-
-      if (!valid) {
-        // scroll first error into view
-        const first = fields.find(f => !f.value.trim());
-        if (first) first.focus();
-        return;
-      }
-
-      // Show success
-      document.getElementById('complaint-form-card').style.display = 'none';
-      document.getElementById('success-banner').classList.add('show');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    /* ── Reset form after new submission ── */
-    function resetForm() {
-      ['f-title','f-cat','f-flat','f-desc'].forEach(id => {
-        document.getElementById(id).value = '';
-        document.getElementById(id).classList.remove('field-error');
-      });
-      document.getElementById('f-priority').selectedIndex = 0;
-      document.getElementById('complaint-form-card').style.display = 'block';
-      document.getElementById('success-banner').classList.remove('show');
-    }
-  </script>
-
+  });
+}
+</script>
 </body>
 </html>
